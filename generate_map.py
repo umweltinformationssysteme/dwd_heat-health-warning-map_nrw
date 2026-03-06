@@ -97,6 +97,10 @@ def fetch_dwd_warnings(date: datetime.date) -> dict[str, int]:
     """
     Lädt hwtrend_YYYYMMDD.json vom DWD und gibt ein Dict {CCC: level} zurück.
     Gibt bei Fehler ein leeres Dict zurück (alle Kreise = Stufe 0).
+
+    Das DWD-JSON ist ein Array von Objekten, z.B.:
+      [{"ccc": "511", "mf": 0, ...}, {"ccc": "512", "mf": 1, ...}, ...]
+    oder (neueres Format) ein Dict mit "content"-Key.
     """
     filename = f"hwtrend_{date.strftime('%Y%m%d')}.json"
     url = DWD_BASE_URL + filename
@@ -104,12 +108,47 @@ def fetch_dwd_warnings(date: datetime.date) -> dict[str, int]:
         r = requests.get(url, timeout=15)
         r.raise_for_status()
         data = r.json()
+
+        # Struktur-Debugging beim ersten Aufruf
+        sample = data[:1] if isinstance(data, list) else data
+        print(f"DWD JSON-Struktur (Sample): {sample}", file=sys.stderr)
+
+        # Falls Top-Level ein Dict ist, nach Liste suchen
+        if isinstance(data, dict):
+            # Typische Keys: "content", "items", "data", "districts"
+            for key in ("content", "items", "data", "districts", "warnings"):
+                if key in data and isinstance(data[key], list):
+                    data = data[key]
+                    break
+            else:
+                # Fallback: erstes list-Wert im Dict
+                for v in data.values():
+                    if isinstance(v, list):
+                        data = v
+                        break
+
         warnings = {}
-        # DWD-Format: Liste von Objekten mit "ccc" und "mf" (max forecast = Warnstufe)
         for entry in data:
-            ccc = str(entry.get("ccc", "")).strip()
-            level = int(entry.get("mf", 0) or 0)
-            warnings[ccc] = level
+            if isinstance(entry, dict):
+                # ccc kann "ccc", "CCC", "id", "districtId" heißen
+                ccc = str(
+                    entry.get("ccc") or entry.get("CCC") or
+                    entry.get("id") or entry.get("districtId") or ""
+                ).strip()
+                # Warnstufe kann "mf", "level", "warnlevel", "value" heißen
+                raw_level = (
+                    entry.get("mf") or entry.get("level") or
+                    entry.get("warnlevel") or entry.get("value") or 0
+                )
+                level = int(raw_level or 0)
+                if ccc:
+                    warnings[ccc] = level
+            elif isinstance(entry, str):
+                # Manchmal: ["511:0", "512:1", ...]  oder nur Keys
+                if ":" in entry:
+                    parts = entry.split(":")
+                    warnings[parts[0].strip()] = int(parts[1].strip() or 0)
+
         print(f"DWD-Daten geladen: {len(warnings)} Einträge ({filename})")
         return warnings
     except Exception as e:
@@ -250,10 +289,18 @@ def render_map(gdf: gpd.GeoDataFrame, warnings: dict, date: datetime.date):
     )
 
     # ── Speichern als JPG ─────────────────────────────────────────────────────
-    fig.savefig(OUTPUT_FILE, format="jpeg", dpi=dpi, quality=88,
-                bbox_inches="tight", pad_inches=0)
+    # Matplotlib savefig als PNG in Buffer, dann via PIL zu JPEG mit Qualität
+    import io
+    from PIL import Image
+    buf = io.BytesIO()
+    fig.savefig(buf, format="png", dpi=dpi, bbox_inches="tight", pad_inches=0)
     plt.close(fig)
-    print(f"Karte gespeichert: {OUTPUT_FILE}")
+    buf.seek(0)
+    img = Image.open(buf).convert("RGB")
+    # Exakt auf 1280×640 skalieren (sollte schon passen, aber sicher ist sicher)
+    img = img.resize((IMG_W_PX, IMG_H_PX), Image.LANCZOS)
+    img.save(OUTPUT_FILE, format="JPEG", quality=88, optimize=True)
+    print(f"Karte gespeichert: {OUTPUT_FILE} ({img.size[0]}×{img.size[1]} px)")
 
 
 def main():

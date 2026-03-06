@@ -221,7 +221,19 @@ def render_map(gdf: gpd.GeoDataFrame, date: datetime.date):
         mpatches.Patch(facecolor=COLORS[2][:3] + (1.0,), edgecolor="#888",
                        label=f"Extreme Wärmebelastung  ({c.get(2, 0)})"),
     ]
-    leg = ax.legend(handles=handles, loc="lower right", fontsize=7,
+    # Legende: rechter Rand exakt bei 948 px vom linken Bildrand.
+    # bbox_to_anchor mit loc="lower right" verankert die rechte untere Ecke der Legende.
+    # Koordinaten als Axes-Fraktion (0..1): 948/1280 horizontal, 12px Abstand unten.
+    LEGEND_RIGHT_PX  = 948
+    LEGEND_BOTTOM_PX = 12
+    x_anchor = LEGEND_RIGHT_PX  / IMG_W_PX
+    y_anchor = LEGEND_BOTTOM_PX / IMG_H_PX
+
+    leg = ax.legend(handles=handles,
+                    loc="lower right",
+                    bbox_to_anchor=(x_anchor, y_anchor),
+                    bbox_transform=ax.transAxes,
+                    fontsize=7,
                     framealpha=0.85, edgecolor="#bbbbbb", facecolor="#ffffff",
                     handlelength=1.2, handleheight=1.0,
                     borderpad=0.7, labelspacing=0.4,

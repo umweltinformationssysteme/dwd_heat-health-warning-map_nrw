@@ -3,7 +3,6 @@ name: NRW Hitzekarte täglich
 on:
   schedule:
     # Täglich 08:15 UTC = 09:15 MEZ / 10:15 MESZ
-    # DWD veröffentlicht um 08:00 UTC, 15 Min. Puffer
     - cron: "15 8 * * *"
   workflow_dispatch:   # manuell auslösbar
 

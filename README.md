@@ -39,13 +39,6 @@ Die DWD-Warnstufen aus `Trend[0]` werden wie folgt dargestellt. Trendwerte (Stuf
     └── hitzekarte.yml       # GitHub Actions Workflow (cron 08:15 UTC)
 ```
 
-## Setup
-
-1. Repo klonen oder forken
-2. `landkreise.geojson` und `background.tiff` im Repo-Root ablegen
-3. GitHub Actions aktivieren – die Karte wird dann täglich automatisch generiert und committed
-4. Manueller Start jederzeit über den Button „Run workflow" im Actions-Tab möglich
-
 ## Datenquellen
 
 | Datensatz | Quelle |

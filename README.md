@@ -34,9 +34,9 @@ The DWD warning levels from `Trend[0]` are represented as follows. Trend values 
 ├── requirements.txt         # pip dependencies (no Conda)
 ├── landkreise.geojson       # NRW district boundaries (BKG)
 ├── background.tiff          # Sentinel-2 True Color Cloudless Mosaic (georef.)
-├── Hitzekarte_NRW_heute.jpg # Daily updated output image
+├── heat-warning-map-nrw-today.jpg # Daily updated output image
 └── .github/workflows/
-    └── hitzekarte.yml       # GitHub Actions Workflow (cron 08:15 UTC)
+    └── main.yml       # GitHub Actions Workflow (cron 08:15 UTC)
 ```
 
 ## Data Sources

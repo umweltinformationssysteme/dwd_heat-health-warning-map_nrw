@@ -215,11 +215,11 @@ def render_map(gdf: gpd.GeoDataFrame, date: datetime.date):
     c = gdf_proj["warn_level"].value_counts().to_dict()
     handles = [
         mpatches.Patch(facecolor=COLORS[0][:3] + (1.0,), edgecolor="#888",
-                       label=f"No Warning  ({c.get(0, 0)} Districts)"),
+                       label=f"Keine Warnung  ({c.get(0, 0)} Kreise)"),
         mpatches.Patch(facecolor=COLORS[1][:3] + (1.0,), edgecolor="#888",
-                       label=f"High Heat Stress  ({c.get(1, 0)})"),
+                       label=f"Starke W\u00e4rmebelastung  ({c.get(1, 0)})"),
         mpatches.Patch(facecolor=COLORS[2][:3] + (1.0,), edgecolor="#888",
-                       label=f"Extreme Heat Stress  ({c.get(2, 0)})"),
+                       label=f"Extreme W\u00e4rmebelastung  ({c.get(2, 0)})"),
     ]
     # Legend: right edge exactly at 948 px from left edge.
     # bbox_to_anchor with loc="lower right" anchors the bottom-right corner of the legend.

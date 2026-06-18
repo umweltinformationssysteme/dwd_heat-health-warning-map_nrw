@@ -236,7 +236,7 @@ def render_map(gdf: gpd.GeoDataFrame, date: datetime.date):
                     framealpha=0.85, edgecolor="#bbbbbb", facecolor="#ffffff",
                     handlelength=1.2, handleheight=1.0,
                     borderpad=0.7, labelspacing=0.4,
-                    title=f"NRW Heat Warnings\n{date.strftime('%d.%m.%Y')}",
+                    title=f"NRW Hitzewarnungen\n{date.strftime('%d.%m.%Y')}",
                     title_fontsize=7.5)
     leg.get_title().set_fontweight("bold")
 
